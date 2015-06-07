@@ -34,7 +34,6 @@ func main() {
 }
 
 func stream(c *gin.Context) {
-
 	roomid := c.Param("roomid")
 	listener := backend.OpenListener(roomid)
 	defer backend.CloseListener(roomid, listener)
@@ -70,7 +69,6 @@ func roomGET(c *gin.Context) {
 }
 
 func roomPOST(c *gin.Context) {
-
 	roomid := c.Param("roomid")
 	userid := c.PostForm("user")
 	message := c.PostForm("message")
@@ -84,6 +82,10 @@ func roomPOST(c *gin.Context) {
 }
 
 func roomDELETE(c *gin.Context) {
-	roomid := c.Param("roomid")
-	backend.DeleteBroadcast(roomid)
+	id := c.Param("roomid")
+	if (chat.DissolveRoom(id)) {
+		c.String(http.StatusOK, "")
+	} else {
+		c.String(http.StatusNotFound, "")
+	}
 }
