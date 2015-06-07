@@ -48,7 +48,7 @@ func stream(c *gin.Context) {
 func createRoom(c *gin.Context) {
 	r := Room{}
 	c.BindJSON(&r)
-	locFormat := c.Request.Host + c.Request.URL.Path + "/%v"
+	locFormat := c.Request.URL.Path + "/%v"
 	r = chat.CreateRoom(r, locFormat)
 
 	c.Header("Location", r.Location)
