@@ -1,15 +1,14 @@
-package main
+package chat
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"io"
 	"math/rand"
-	"github.com/gin-gonic/gin"
-
-
 )
 
-const baseUrl string ="/chat"
+const baseUrl string = "/chat"
+
 var backend *Backend
 
 func main() {
@@ -24,7 +23,6 @@ func main() {
 	router.POST("/rooms/:roomid", roomPOST)
 	router.DELETE("/rooms/:roomid", roomDELETE)
 	router.GET("/streams/:roomid", stream)
-
 
 	router.Run("golang-VirtualBox.fritz.box:8080")
 }
@@ -49,8 +47,8 @@ func roomGET(c *gin.Context) {
 	roomid := c.Param("roomid")
 	userid := fmt.Sprint(rand.Int31())
 	c.HTML(200, "chat_room", gin.H{
-		"roomid": roomid,
-		"userid": userid,
+		"roomid":  roomid,
+		"userid":  userid,
 		"baseUrl": baseUrl,
 	})
 }

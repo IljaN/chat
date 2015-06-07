@@ -1,19 +1,17 @@
-package main
+package chat
 
 import "github.com/dustin/go-broadcast"
 
 type Backend struct {
 	roomChannels map[string]broadcast.Broadcaster
-
 }
 
 func NewBackend() *Backend {
-	return &Backend{roomChannels: make(map[string]broadcast.Broadcaster) }
+	return &Backend{roomChannels: make(map[string]broadcast.Broadcaster)}
 
 }
 
-
-func (b *Backend) GetRoomChannels() []string  {
+func (b *Backend) GetRoomChannels() []string {
 	keys := make([]string, len(b.roomChannels))
 	i := 0
 	for k := range b.roomChannels {
