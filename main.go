@@ -1,24 +1,29 @@
-package chat
+package main
 
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
 	"math/rand"
+	"net/http"
 )
 
 const baseUrl string = "/chat"
 
 var backend *Backend
+var chat *Chat
 
 func main() {
 
 	backend = NewBackend()
+	chat = &Chat{backend, make(map[string]Room)}
+
 	router := gin.Default()
 	router.SetHTMLTemplate(html)
 	router.BasePath = baseUrl
 
 	router.GET("/rooms", roomIndexGET)
+	router.POST("/rooms", createRoom)
 	router.GET("/rooms/:roomid", roomGET)
 	router.POST("/rooms/:roomid", roomPOST)
 	router.DELETE("/rooms/:roomid", roomDELETE)
@@ -28,6 +33,7 @@ func main() {
 }
 
 func stream(c *gin.Context) {
+
 	roomid := c.Param("roomid")
 	listener := backend.OpenListener(roomid)
 	defer backend.CloseListener(roomid, listener)
@@ -36,6 +42,15 @@ func stream(c *gin.Context) {
 		c.SSEvent("message", <-listener)
 		return true
 	})
+}
+
+func createRoom(c *gin.Context) {
+	r := Room{}
+	c.BindJSON(&r)
+	roomId := chat.CreateRoom(r)
+
+	c.Header("Location", c.Request.URL.Path+"/"+roomId)
+	c.String(http.StatusCreated, "")
 }
 
 func roomIndexGET(c *gin.Context) {
@@ -54,6 +69,7 @@ func roomGET(c *gin.Context) {
 }
 
 func roomPOST(c *gin.Context) {
+
 	roomid := c.Param("roomid")
 	userid := c.PostForm("user")
 	message := c.PostForm("message")
@@ -63,6 +79,7 @@ func roomPOST(c *gin.Context) {
 		"status":  "success",
 		"message": message,
 	})
+
 }
 
 func roomDELETE(c *gin.Context) {
