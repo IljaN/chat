@@ -7,8 +7,9 @@ import (
 )
 
 type Room struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id       string `json:"id"`
+	Name     string `json:"name"`
+	Location string `json:"location"`
 }
 
 func (r *Room) String() string {

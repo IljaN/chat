@@ -9,6 +9,7 @@ import (
 )
 
 const baseUrl string = "/chat"
+const host string = "golang-VirtualBox.fritz.box:8080"
 
 var backend *Backend
 var chat *Chat
@@ -17,6 +18,7 @@ func main() {
 
 	backend = NewBackend()
 	chat = &Chat{backend, make(map[string]Room)}
+
 
 	router := gin.Default()
 	router.SetHTMLTemplate(html)
@@ -29,7 +31,7 @@ func main() {
 	router.DELETE("/rooms/:roomid", roomDELETE)
 	router.GET("/streams/:roomid", stream)
 
-	router.Run("golang-VirtualBox.fritz.box:8080")
+	router.Run(host)
 }
 
 func stream(c *gin.Context) {
@@ -47,15 +49,15 @@ func stream(c *gin.Context) {
 func createRoom(c *gin.Context) {
 	r := Room{}
 	c.BindJSON(&r)
-	roomId := chat.CreateRoom(r)
+	locFormat := c.Request.Host + c.Request.URL.Path+"/%v"
+	r = chat.CreateRoom(r, locFormat)
 
-	c.Header("Location", c.Request.URL.Path+"/"+roomId)
+	c.Header("Location", r.Location)
 	c.String(http.StatusCreated, "")
 }
 
 func roomIndexGET(c *gin.Context) {
-	channelList := backend.GetRoomChannels()
-	c.JSON(200, channelList)
+	c.JSON(200, chat.Rooms)
 }
 
 func roomGET(c *gin.Context) {
