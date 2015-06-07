@@ -30,6 +30,8 @@ func main() {
 	router.DELETE("/rooms/:roomid", roomDELETE)
 	router.GET("/streams/:roomid", stream)
 
+	router.GET("/debug", debug)
+
 	router.Run(host)
 }
 
@@ -83,9 +85,13 @@ func roomPOST(c *gin.Context) {
 
 func roomDELETE(c *gin.Context) {
 	id := c.Param("roomid")
-	if (chat.DissolveRoom(id)) {
+	if chat.DissolveRoom(id) {
 		c.String(http.StatusOK, "")
 	} else {
 		c.String(http.StatusNotFound, "")
 	}
+}
+
+func debug(c *gin.Context) {
+	c.String(200, "#backendRoomChannels: %v | #rooms: %v", len(chat.Backend.roomChannels), len(chat.Rooms) )
 }
