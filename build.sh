@@ -26,7 +26,7 @@ if [ -z "$RUN_BINARY_NAME" ]; then   #Asume directory name as binary name if no 
 fi
 
 if [ $DO_BUILD -eq 1 ]; then
-    go build
+    go build -a
 fi
 
 if [ ! -f "$RUN_BINARY_NAME" ]; then
