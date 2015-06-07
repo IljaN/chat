@@ -6,6 +6,9 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	//"github.com/IljaN/chat/user"
+	"github.com/garyburd/redigo/redis"
+	"os"
 )
 
 const baseUrl string = "/chat"
@@ -15,6 +18,15 @@ var backend *Backend
 var chat *Chat
 
 func main() {
+
+	conn, err := redis.Dial("tcp", "127.0.0.1:6379")
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Print(conn.Close())
+	os.Exit(0)
 
 	backend = NewBackend()
 	chat = &Chat{backend, make(map[string]Room)}
@@ -93,5 +105,5 @@ func roomDELETE(c *gin.Context) {
 }
 
 func debug(c *gin.Context) {
-	c.String(200, "#backendRoomChannels: %v | #rooms: %v", len(chat.Backend.roomChannels), len(chat.Rooms) )
+	c.String(200, "#backendRoomChannels: %v | #rooms: %v", len(chat.Backend.roomChannels), len(chat.Rooms))
 }
