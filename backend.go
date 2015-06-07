@@ -11,16 +11,6 @@ func NewBackend() *Backend {
 
 }
 
-func (b *Backend) GetRoomChannels() []string {
-	keys := make([]string, len(b.roomChannels))
-	i := 0
-	for k := range b.roomChannels {
-		keys[i] = k
-		i += 1
-	}
-	return keys
-}
-
 func (b *Backend) OpenListener(roomid string) chan interface{} {
 	listener := make(chan interface{})
 	b.Room(roomid).Register(listener)
