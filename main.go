@@ -13,8 +13,8 @@ import (
 
 const baseUrl string = "/chat"
 const host string = "golang-VirtualBox.fritz.box:8080"
-const pubKeyPath string = "keys/rsa.pub"
-const privKeyPath string = "keys/app.rsa.pub"
+const pubKeyPath string = "keys/app.rsa.pub"
+const privKeyPath string = "keys/app.rsa"
 
 var backend *Backend
 var chat *Chat
