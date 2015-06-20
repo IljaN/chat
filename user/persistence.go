@@ -45,7 +45,7 @@ func (p *Persistence) loadById(id string) (User, error) {
 	return u, err
 }
 
-func (p *Persistence) persistUser(u User) {
+func (p *Persistence) persist(u User) {
 	_, err := p.redis.Do("HMSET", redisUserPrefix+u.Id,
 		"id", u.Id,
 		"name", u.Name,
