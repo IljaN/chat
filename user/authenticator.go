@@ -15,16 +15,16 @@ type Authenticator struct {
 
 func NewAuthenticator(privKeyPath, pubKeyPath string) *Authenticator {
 	signBytes, err := ioutil.ReadFile(privKeyPath)
-	log.Fatal(err)
+	fatal(err)
 
 	signKey, err := jwt.ParseRSAPrivateKeyFromPEM(signBytes)
-	log.Fatal(err)
+	fatal(err)
 
 	verifyBytes, err := ioutil.ReadFile(pubKeyPath)
-	log.Fatal(err)
+	fatal(err)
 
 	verifyKey, err := jwt.ParseRSAPublicKeyFromPEM(verifyBytes)
-	log.Fatal(err)
+	fatal(err)
 
 	return &Authenticator{verifyKey, signKey}
 }
@@ -72,6 +72,8 @@ func (a *Authenticator) Validate(token string) (err error) {
 	return err
 }
 
-func (a *Authenticator) handleErrors(err error, token *jwt.Token) {
-
+func fatal(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
 }
