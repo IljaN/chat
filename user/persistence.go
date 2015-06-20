@@ -9,11 +9,11 @@ const redisUserPrefix = "user:"
 const redisUserNameIdxPrefix = "idx_user_name:"
 
 type Persistence struct {
-	redis redis.Conn
+	RedisConn redis.Conn
 }
 
 func (p *Persistence) loadByName(name string) (User, error) {
-	r, err := redis.String(p.redis.Do("GET", redisUserNameIdxPrefix+name))
+	r, err := redis.String(p.RedisConn.Do("GET", redisUserNameIdxPrefix+name))
 
 	if err != nil {
 		return User{}, err
@@ -34,7 +34,7 @@ func (p *Persistence) loadByName(name string) (User, error) {
 }
 
 func (p *Persistence) loadById(id string) (User, error) {
-	umap, err := redis.StringMap(p.redis.Do("HGETALL", redisUserPrefix+id))
+	umap, err := redis.StringMap(p.RedisConn.Do("HGETALL", redisUserPrefix+id))
 
 	if err != nil {
 		return User{}, err
@@ -46,7 +46,7 @@ func (p *Persistence) loadById(id string) (User, error) {
 }
 
 func (p *Persistence) persist(u User) {
-	_, err := p.redis.Do("HMSET", redisUserPrefix+u.Id,
+	_, err := p.RedisConn.Do("HMSET", redisUserPrefix+u.Id,
 		"id", u.Id,
 		"name", u.Name,
 		"passwordHash", u.passwordHash,
@@ -56,11 +56,11 @@ func (p *Persistence) persist(u User) {
 		log.Panicf("Error:", err)
 	}
 
-	_, err = p.redis.Do("SET", redisUserNameIdxPrefix+u.Name, u.Id)
+	_, err = p.RedisConn.Do("SET", redisUserNameIdxPrefix+u.Name, u.Id)
 
 	if err != nil {
 		log.Panicf("Error:", err)
 	}
 
-	p.redis.Flush()
+	p.RedisConn.Flush()
 }

@@ -2,31 +2,36 @@ package main
 
 import (
 	"fmt"
+	"github.com/IljaN/chat/user"
+	"github.com/garyburd/redigo/redis"
 	"github.com/gin-gonic/gin"
 	"io"
+	"log"
 	"math/rand"
 	"net/http"
-	//"github.com/IljaN/chat/user"
-	"github.com/garyburd/redigo/redis"
-	"os"
 )
 
 const baseUrl string = "/chat"
 const host string = "golang-VirtualBox.fritz.box:8080"
+const pubKeyPath string = "keys/rsa.pub"
+const privKeyPath string = "keys/app.rsa.pub"
 
 var backend *Backend
 var chat *Chat
+var persistence *user.Persistence
 
 func main() {
 
 	conn, err := redis.Dial("tcp", "127.0.0.1:6379")
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
-	fmt.Print(conn.Close())
-	os.Exit(0)
+	persistence = &user.Persistence{conn}
+	a := user.NewAuthenticator(privKeyPath, pubKeyPath)
+	um := user.NewManager(persistence, a)
+	um.Register("mike", "jones")
 
 	backend = NewBackend()
 	chat = &Chat{backend, make(map[string]Room)}
