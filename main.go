@@ -19,6 +19,7 @@ const privKeyPath string = "keys/app.rsa"
 var backend *Backend
 var chat *Chat
 var persistence *user.Persistence
+var manager *user.Manager
 
 func main() {
 
@@ -30,8 +31,8 @@ func main() {
 
 	persistence = &user.Persistence{conn}
 	a := user.NewAuthenticator(privKeyPath, pubKeyPath)
-	um := user.NewManager(persistence, a)
-	um.Register("mike", "jones")
+	manager = user.NewManager(persistence, a)
+
 
 	backend = NewBackend()
 	chat = &Chat{backend, make(map[string]Room)}
@@ -39,13 +40,14 @@ func main() {
 	router := gin.Default()
 	router.SetHTMLTemplate(html)
 	router.BasePath = baseUrl
-
+	router.POST("/login", login)
 	router.GET("/rooms", roomIndexGET)
 	router.POST("/rooms", createRoom)
 	router.GET("/rooms/:roomid", roomGET)
 	router.POST("/rooms/:roomid", roomPOST)
 	router.DELETE("/rooms/:roomid", roomDELETE)
 	router.GET("/streams/:roomid", stream)
+	router.POST("/auth", authenticate)
 
 	router.GET("/debug", debug)
 
@@ -61,6 +63,37 @@ func stream(c *gin.Context) {
 		c.SSEvent("message", <-listener)
 		return true
 	})
+}
+
+func login(c *gin.Context) {
+
+
+	token, err := manager.Login(c.Request.FormValue("username"), c.Request.FormValue("password"))
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+	}
+
+	c.Header("Chat-Auth", token)
+
+}
+
+func authenticate(c *gin.Context) {
+	token := c.Request.Header.Get("Chat-Auth")
+
+	isAuthenticated, err := manager.Authenticated(token)
+
+	if err != nil {
+		log.Print(err.Error())
+		c.AbortWithError(http.StatusInternalServerError, err)
+
+	}
+
+	if !isAuthenticated  {
+		c.String(http.StatusUnauthorized, "NO")
+		return
+	} else {
+		c.String(http.StatusOK, "YES")
+	}
 }
 
 func createRoom(c *gin.Context) {

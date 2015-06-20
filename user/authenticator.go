@@ -30,14 +30,16 @@ func NewAuthenticator(privKeyPath, pubKeyPath string) *Authenticator {
 }
 
 func (a *Authenticator) CreateToken(username string) (token string, err error) {
-	t := jwt.New(jwt.GetSigningMethod("HS256"))
+
+
+	t := jwt.New(jwt.GetSigningMethod("RS256"))
 	t.Claims["AccessToken"] = "level1"
 	t.Claims["CustomUserInfo"] = struct {
 		Name string
 		Kind string
 	}{username, "human"}
 
-	t.Claims["exp"] = time.Now().Add(time.Minute * 1).Unix()
+	t.Claims["exp"] = time.Now().Add(time.Minute * 60).Unix()
 
 	return t.SignedString(a.signKey)
 }

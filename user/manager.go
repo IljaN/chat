@@ -3,7 +3,6 @@ package user
 import (
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
-	"log"
 	"math/rand"
 	"time"
 )
@@ -32,11 +31,11 @@ func (m *Manager) Register(name string, password string) {
 	m.persistence.persist(u)
 }
 
-func (m *Manager) Login(username, password string) {
+func (m *Manager) Login(username, password string) (string,error) {
 	u, err := m.persistence.loadByName(username)
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	hashedPwBytes := []byte(u.passwordHash)
@@ -45,8 +44,18 @@ func (m *Manager) Login(username, password string) {
 	err = bcrypt.CompareHashAndPassword(hashedPwBytes, pwBytes)
 
 	if err != nil {
-
+		return "", err
 	}
+
+	// Fehler hier
+	token, err := m.authenticator.CreateToken(username)
+
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, err
 
 }
 
