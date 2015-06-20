@@ -31,7 +31,7 @@ func (m *Manager) Register(name string, password string) {
 	m.persistence.persist(u)
 }
 
-func (m *Manager) Login(username, password string) (string,error) {
+func (m *Manager) Login(username, password string) (string, error) {
 	u, err := m.persistence.loadByName(username)
 
 	if err != nil {
@@ -49,7 +49,6 @@ func (m *Manager) Login(username, password string) (string,error) {
 
 	// Fehler hier
 	token, err := m.authenticator.CreateToken(username)
-
 
 	if err != nil {
 		return "", err

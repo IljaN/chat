@@ -31,7 +31,6 @@ func NewAuthenticator(privKeyPath, pubKeyPath string) *Authenticator {
 
 func (a *Authenticator) CreateToken(username string) (token string, err error) {
 
-
 	t := jwt.New(jwt.GetSigningMethod("RS256"))
 	t.Claims["AccessToken"] = "level1"
 	t.Claims["CustomUserInfo"] = struct {

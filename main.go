@@ -33,7 +33,6 @@ func main() {
 	a := user.NewAuthenticator(privKeyPath, pubKeyPath)
 	manager = user.NewManager(persistence, a)
 
-
 	backend = NewBackend()
 	chat = &Chat{backend, make(map[string]Room)}
 
@@ -67,7 +66,6 @@ func stream(c *gin.Context) {
 
 func login(c *gin.Context) {
 
-
 	token, err := manager.Login(c.Request.FormValue("username"), c.Request.FormValue("password"))
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
@@ -88,7 +86,7 @@ func authenticate(c *gin.Context) {
 
 	}
 
-	if !isAuthenticated  {
+	if !isAuthenticated {
 		c.String(http.StatusUnauthorized, "NO")
 		return
 	} else {
