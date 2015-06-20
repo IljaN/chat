@@ -17,7 +17,7 @@ const pubKeyPath string = "keys/app.rsa.pub"
 const privKeyPath string = "keys/app.rsa"
 
 var backend *Backend
-var chat *Chat
+var ch *Chat
 var persistence *user.Persistence
 var manager *user.Manager
 
@@ -34,7 +34,7 @@ func main() {
 	manager = user.NewManager(persistence, a)
 
 	backend = NewBackend()
-	chat = &Chat{backend, make(map[string]Room)}
+	ch = &Chat{backend, make(map[string]Room)}
 
 	router := gin.Default()
 	router.SetHTMLTemplate(html)
@@ -46,7 +46,7 @@ func main() {
 	router.POST("/rooms/:roomid", roomPOST)
 	router.DELETE("/rooms/:roomid", roomDELETE)
 	router.GET("/streams/:roomid", stream)
-	router.POST("/auth", authenticate)
+	router.GET("/protected", Firewall(manager), protected)
 
 	router.GET("/debug", debug)
 
@@ -75,37 +75,23 @@ func login(c *gin.Context) {
 
 }
 
-func authenticate(c *gin.Context) {
-	token := c.Request.Header.Get("Chat-Auth")
+func protected(c *gin.Context) {
+	c.String(http.StatusOK, "INSIDE!")
 
-	isAuthenticated, err := manager.Authenticated(token)
-
-	if err != nil {
-		log.Print(err.Error())
-		c.AbortWithError(http.StatusInternalServerError, err)
-
-	}
-
-	if !isAuthenticated {
-		c.String(http.StatusUnauthorized, "NO")
-		return
-	} else {
-		c.String(http.StatusOK, "YES")
-	}
 }
 
 func createRoom(c *gin.Context) {
 	r := Room{}
 	c.BindJSON(&r)
 	locFormat := c.Request.URL.Path + "/%v"
-	r = chat.CreateRoom(r, locFormat)
+	r = ch.CreateRoom(r, locFormat)
 
 	c.Header("Location", r.Location)
 	c.String(http.StatusCreated, "")
 }
 
 func roomIndexGET(c *gin.Context) {
-	c.JSON(200, chat.Rooms)
+	c.JSON(200, ch.Rooms)
 }
 
 func roomGET(c *gin.Context) {
@@ -133,7 +119,7 @@ func roomPOST(c *gin.Context) {
 
 func roomDELETE(c *gin.Context) {
 	id := c.Param("roomid")
-	if chat.DissolveRoom(id) {
+	if ch.DissolveRoom(id) {
 		c.String(http.StatusOK, "")
 	} else {
 		c.String(http.StatusNotFound, "")
@@ -141,5 +127,5 @@ func roomDELETE(c *gin.Context) {
 }
 
 func debug(c *gin.Context) {
-	c.String(200, "#backendRoomChannels: %v | #rooms: %v", len(chat.Backend.roomChannels), len(chat.Rooms))
+	c.String(200, "#backendRoomChannels: %v | #rooms: %v", len(ch.Backend.roomChannels), len(ch.Rooms))
 }
